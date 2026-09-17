@@ -9,6 +9,9 @@ export interface ProgressCallbackData {
   total: number;
 }
 
+const CMAP_URL = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.0.379/cmaps/';
+const STANDARD_FONT_URL = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.0.379/standard_fonts/';
+
 export async function exportPdfZip(
   sourceArrayBuffer: ArrayBuffer,
   groups: SplitGroup[],
@@ -19,19 +22,21 @@ export async function exportPdfZip(
     throw new Error('分割グループが存在しません。');
   }
 
-  // Load source document via pdfjs-dist (handles ALL encrypted/protected PDFs cleanly in JS memory)
+  // Load source document via pdfjs-dist with Japanese CMap fonts configured
   const loadingTask = pdfjsLib.getDocument({
-    data: new Uint8Array(sourceArrayBuffer.slice(0))
+    data: new Uint8Array(sourceArrayBuffer.slice(0)),
+    cMapUrl: CMAP_URL,
+    cMapPacked: true,
+    standardFontDataUrl: STANDARD_FONT_URL
   });
   const pdfJsDoc = await loadingTask.promise;
 
-  // Try pdf-lib direct load for unencrypted PDFs
+  // Try pdf-lib direct load with ignoreEncryption: true
   let srcDocPdfLib: PDFDocument | null = null;
   try {
     const bufferCopy = sourceArrayBuffer.slice(0);
-    srcDocPdfLib = await PDFDocument.load(bufferCopy);
+    srcDocPdfLib = await PDFDocument.load(bufferCopy, { ignoreEncryption: true });
   } catch (e) {
-    // If encrypted or permission-flagged, srcDocPdfLib stays null and we use high-res pdfjs decryption rendering
     srcDocPdfLib = null;
   }
 
@@ -46,16 +51,16 @@ export async function exportPdfZip(
     const newDoc = await PDFDocument.create();
 
     if (srcDocPdfLib) {
-      // Unencrypted PDF: Copy vector pages directly for 100% loss-less text
+      // Unencrypted/Standard PDF: Copy vector pages directly for 100% loss-less text
       try {
         const copiedPages = await newDoc.copyPages(srcDocPdfLib, group.pageIndices);
         copiedPages.forEach((page) => newDoc.addPage(page));
       } catch (err) {
-        // Fallback to high-res pdfjs rendering if copyPages fails
+        // Fallback to high-res CJK-rendered pdfjs pages if copyPages fails
         await renderGroupPagesWithPdfJs(pdfJsDoc, group.pageIndices, newDoc);
       }
     } else {
-      // Encrypted / Protected PDF: Render via pdfjs-dist at high-res (scale 2.0 = 300DPI) to decrypt page content streams
+      // Encrypted / Protected PDF: Render via pdfjs-dist with CMaps at high-res (scale 2.0 = 300DPI)
       await renderGroupPagesWithPdfJs(pdfJsDoc, group.pageIndices, newDoc);
     }
 
@@ -89,7 +94,7 @@ export async function exportPdfZip(
 }
 
 /**
- * Helper to render pages via pdfjs-dist onto canvas and embed as high-resolution images in pdf-lib
+ * Helper to render pages via pdfjs-dist onto canvas with Japanese CMap fonts and embed as PNG images in pdf-lib
  */
 async function renderGroupPagesWithPdfJs(
   pdfJsDoc: pdfjsLib.PDFDocumentProxy,
@@ -111,19 +116,22 @@ async function renderGroupPagesWithPdfJs(
     canvas.width = viewport.width;
     canvas.height = viewport.height;
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // Fill solid white background so transparent PDF backgrounds don't render black/blank
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+    // Render PDF page (vectors + Japanese text layer)
     await (page.render as any)({
       canvasContext: ctx,
       viewport
     }).promise;
 
-    // Convert canvas to JPEG data URL
-    const imgDataUrl = canvas.toDataURL('image/jpeg', 0.92);
+    // Convert canvas to PNG data URL for lossless crisp Japanese text rendering
+    const imgDataUrl = canvas.toDataURL('image/png');
 
-    // Embed JPEG in newDoc
+    // Embed PNG in newDoc
     const imgBytes = dataUrlToUint8Array(imgDataUrl);
-    const embeddedImg = await newDoc.embedJpg(imgBytes);
+    const embeddedImg = await newDoc.embedPng(imgBytes);
 
     // Add page with exact original dimensions (unscaledViewport)
     const pdfPage = newDoc.addPage([unscaledViewport.width, unscaledViewport.height]);

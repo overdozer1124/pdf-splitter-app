@@ -9,15 +9,20 @@ export interface LoadedPdfMeta {
   doc: pdfjsLib.PDFDocumentProxy;
 }
 
+const CMAP_URL = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.0.379/cmaps/';
+const STANDARD_FONT_URL = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.0.379/standard_fonts/';
+
 /**
  * Load PDF Document and handle errors cleanly in Japanese
  */
 export async function loadPdfDocument(arrayBuffer: ArrayBuffer): Promise<LoadedPdfMeta> {
   try {
-    // Copy ArrayBuffer via .slice(0) to prevent pdfjs worker from detaching original buffer
     const bufferCopy = arrayBuffer.slice(0);
     const loadingTask = pdfjsLib.getDocument({
-      data: new Uint8Array(bufferCopy)
+      data: new Uint8Array(bufferCopy),
+      cMapUrl: CMAP_URL,
+      cMapPacked: true,
+      standardFontDataUrl: STANDARD_FONT_URL
     });
     const doc = await loadingTask.promise;
     if (doc.numPages <= 0) {
@@ -59,6 +64,10 @@ export async function renderThumbnailCanvas(
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
+
+    // Fill white background for clean CJK rendering
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     await (page.render as any)({
       canvasContext: ctx,
