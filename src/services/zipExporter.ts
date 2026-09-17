@@ -31,11 +31,16 @@ export async function exportPdfZip(
   });
   const pdfJsDoc = await loadingTask.promise;
 
-  // Try pdf-lib direct load with ignoreEncryption: true
+  // Check if pdf-lib can copy unencrypted vector pages
   let srcDocPdfLib: PDFDocument | null = null;
   try {
     const bufferCopy = sourceArrayBuffer.slice(0);
-    srcDocPdfLib = await PDFDocument.load(bufferCopy, { ignoreEncryption: true });
+    const loaded = await PDFDocument.load(bufferCopy, { ignoreEncryption: true });
+    // CRITICAL FIX: Only use pdf-lib copyPages if document is NOT encrypted.
+    // Copying pages from encrypted PDFs via pdf-lib produces silent blank white pages.
+    if (!loaded.isEncrypted) {
+      srcDocPdfLib = loaded;
+    }
   } catch (e) {
     srcDocPdfLib = null;
   }
@@ -51,7 +56,7 @@ export async function exportPdfZip(
     const newDoc = await PDFDocument.create();
 
     if (srcDocPdfLib) {
-      // Unencrypted/Standard PDF: Copy vector pages directly for 100% loss-less text
+      // Unencrypted PDF: Copy vector pages directly for 100% loss-less text
       try {
         const copiedPages = await newDoc.copyPages(srcDocPdfLib, group.pageIndices);
         copiedPages.forEach((page) => newDoc.addPage(page));
