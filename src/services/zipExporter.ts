@@ -20,7 +20,9 @@ export async function exportPdfZip(
 
   // Slice arrayBuffer to ensure a non-detached ArrayBuffer copy is passed to pdf-lib
   const bufferCopy = sourceArrayBuffer.slice(0);
-  const srcDoc = await PDFDocument.load(bufferCopy);
+  
+  // Load PDF with ignoreEncryption: true to support PDFs with standard permission flags / empty password encryption
+  const srcDoc = await PDFDocument.load(bufferCopy, { ignoreEncryption: true });
   const zip = new JSZip();
 
   for (let i = 0; i < total; i++) {
