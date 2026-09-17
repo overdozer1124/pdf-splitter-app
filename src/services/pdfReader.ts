@@ -14,8 +14,10 @@ export interface LoadedPdfMeta {
  */
 export async function loadPdfDocument(arrayBuffer: ArrayBuffer): Promise<LoadedPdfMeta> {
   try {
+    // Copy ArrayBuffer via .slice(0) to prevent pdfjs worker from detaching original buffer
+    const bufferCopy = arrayBuffer.slice(0);
     const loadingTask = pdfjsLib.getDocument({
-      data: new Uint8Array(arrayBuffer)
+      data: new Uint8Array(bufferCopy)
     });
     const doc = await loadingTask.promise;
     if (doc.numPages <= 0) {

@@ -20,13 +20,13 @@ export function usePdf() {
 
     try {
       const arrayBuffer = await file.arrayBuffer();
-      const meta = await loadPdfDocument(arrayBuffer);
+      const meta = await loadPdfDocument(arrayBuffer.slice(0));
 
       setSourcePdf({
         name: file.name,
         size: file.size,
         pageCount: meta.pageCount,
-        arrayBuffer
+        arrayBuffer: arrayBuffer.slice(0)
       });
       setPdfDocProxy(meta.doc);
     } catch (err: any) {

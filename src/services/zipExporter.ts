@@ -18,8 +18,9 @@ export async function exportPdfZip(
     throw new Error('分割グループが存在しません。');
   }
 
-  // Load main source document once
-  const srcDoc = await PDFDocument.load(sourceArrayBuffer);
+  // Slice arrayBuffer to ensure a non-detached ArrayBuffer copy is passed to pdf-lib
+  const bufferCopy = sourceArrayBuffer.slice(0);
+  const srcDoc = await PDFDocument.load(bufferCopy);
   const zip = new JSZip();
 
   for (let i = 0; i < total; i++) {
