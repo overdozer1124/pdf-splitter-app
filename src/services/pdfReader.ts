@@ -78,3 +78,49 @@ export async function renderThumbnailCanvas(
     console.error(`Page ${pageIndex + 1} render failed:`, e);
   }
 }
+
+/**
+ * Extract bookmarks (outlines) with their 1-based page numbers
+ */
+export async function extractBookmarks(doc: pdfjsLib.PDFDocumentProxy): Promise<Array<{ title: string; page: number }>> {
+  try {
+    const outline = await doc.getOutline();
+    if (!outline) return [];
+
+    const bookmarks: Array<{ title: string; page: number }> = [];
+    
+    // Helper to traverse outline tree
+    const traverse = async (items: any[]) => {
+      for (const item of items) {
+        if (item.dest) {
+          let dest = item.dest;
+          if (typeof dest === 'string') {
+            dest = await doc.getDestination(dest);
+          }
+          if (Array.isArray(dest) && dest.length > 0) {
+            const pageRef = dest[0];
+            let pageIndex = -1;
+            try {
+              pageIndex = await doc.getPageIndex(pageRef);
+            } catch (e) {
+              // Ignore invalid page refs
+            }
+            if (pageIndex >= 0) {
+              bookmarks.push({ title: item.title, page: pageIndex + 1 });
+            }
+          }
+        }
+        if (item.items && item.items.length > 0) {
+          await traverse(item.items);
+        }
+      }
+    };
+
+    await traverse(outline);
+    // Sort by page number
+    return bookmarks.sort((a, b) => a.page - b.page);
+  } catch (err) {
+    console.error('Failed to extract bookmarks:', err);
+    return [];
+  }
+}

@@ -13,6 +13,7 @@ import { NamingModeSelector } from './components/step3/NamingModeSelector';
 import { SequenceNaming } from './components/step3/SequenceNaming';
 import { ManualNaming } from './components/step3/ManualNaming';
 import { SpreadsheetNaming } from './components/step3/SpreadsheetNaming';
+import { BookmarkNaming } from './components/step3/BookmarkNaming';
 import { ValidationPanel } from './components/step4/ValidationPanel';
 import { MappingPreview } from './components/step4/MappingPreview';
 import { ExportProgress } from './components/step4/ExportProgress';
@@ -68,8 +69,10 @@ export const App: React.FC = () => {
     handleImportSpreadsheet,
     handleSelectSheet,
     handleReorderRows,
-    generatedNames
-  } = useNaming(splitGroups);
+    generatedNames,
+    bookmarks,
+    isExtractingBookmarks
+  } = useNaming(splitGroups, pdfDocProxy);
 
   const { isExporting, progress, startExport } = useExport();
 
@@ -224,6 +227,14 @@ export const App: React.FC = () => {
               }
               onReorderRows={handleReorderRows}
               previewNames={generatedNames}
+            />
+          )}
+
+          {namingMode === 'bookmark' && (
+            <BookmarkNaming
+              bookmarks={bookmarks}
+              previewNames={generatedNames}
+              isExtracting={isExtractingBookmarks}
             />
           )}
 

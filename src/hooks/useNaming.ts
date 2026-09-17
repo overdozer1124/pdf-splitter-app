@@ -1,4 +1,5 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
+import * as pdfjsLib from 'pdfjs-dist';
 import type { NamingMode, SequenceConfig, SpreadsheetNamingConfig } from '../types/naming';
 import type { SpreadsheetData, SpreadsheetRow } from '../types/spreadsheet';
 import type { SplitGroup } from '../types/pdf';
@@ -6,9 +7,11 @@ import {
   generateSequenceNames,
   generateSpreadsheetNames
 } from '../services/filenameGenerator';
+import { sanitizeFilename } from '../services/filenameSanitizer';
 import { parseSpreadsheet } from '../services/spreadsheetReader';
+import { extractBookmarks } from '../services/pdfReader';
 
-export function useNaming(splitGroups: SplitGroup[]) {
+export function useNaming(splitGroups: SplitGroup[], pdfDocProxy: pdfjsLib.PDFDocumentProxy | null) {
   const [namingMode, setNamingMode] = useState<NamingMode>('sequence');
 
   // Mode A: Sequence
@@ -32,6 +35,22 @@ export function useNaming(splitGroups: SplitGroup[]) {
     template: '{学年}年_{組}組_{出席番号}_{氏名}',
     zeroPadColumns: {}
   });
+
+  // Mode D: Bookmark
+  const [bookmarks, setBookmarks] = useState<Array<{ title: string; page: number }>>([]);
+  const [isExtractingBookmarks, setIsExtractingBookmarks] = useState(false);
+
+  useEffect(() => {
+    if (pdfDocProxy) {
+      setIsExtractingBookmarks(true);
+      extractBookmarks(pdfDocProxy)
+        .then((b) => setBookmarks(b))
+        .catch(() => setBookmarks([]))
+        .finally(() => setIsExtractingBookmarks(false));
+    } else {
+      setBookmarks([]);
+    }
+  }, [pdfDocProxy]);
 
   const handleManualNameChange = (index: number, newName: string) => {
     const updated = [...manualNames];
@@ -98,10 +117,29 @@ export function useNaming(splitGroups: SplitGroup[]) {
         return generateSpreadsheetNames(spreadsheetData.rows, spreadsheetConfig);
       }
 
+      case 'bookmark': {
+        return splitGroups.map((group, idx) => {
+          // Find the last bookmark that appears at or before the group's start page
+          // (assuming bookmarks are sorted by page ascending)
+          let matchTitle = '';
+          for (let i = bookmarks.length - 1; i >= 0; i--) {
+            if (bookmarks[i].page <= group.startPage) {
+              matchTitle = bookmarks[i].title;
+              break;
+            }
+          }
+          if (matchTitle && matchTitle.trim()) {
+            return sanitizeFilename(matchTitle.trim());
+          }
+          return `split_${idx + 1}.pdf`;
+        });
+      }
+
       default:
         return splitGroups.map((g) => g.fileName);
     }
-  }, [namingMode, splitGroups, sequenceConfig, manualNames, spreadsheetData, spreadsheetConfig]);
+  }, [namingMode, splitGroups, sequenceConfig, manualNames, spreadsheetData, spreadsheetConfig, bookmarks]);
+
 
   return {
     namingMode,
@@ -116,6 +154,8 @@ export function useNaming(splitGroups: SplitGroup[]) {
     handleImportSpreadsheet,
     handleSelectSheet,
     handleReorderRows,
-    generatedNames
+    generatedNames,
+    bookmarks,
+    isExtractingBookmarks
   };
 }

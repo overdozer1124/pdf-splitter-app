@@ -24,6 +24,12 @@ const MODES: { id: NamingMode; label: string; description: string; icon: string 
     label: 'Excel / CSV 名簿読込',
     description: '名簿ファイルから自動的に氏名やテンプレートを適用',
     icon: '📊'
+  },
+  {
+    id: 'bookmark',
+    label: 'PDFしおり (目次)',
+    description: 'PDFファイルに設定されているしおり(目次)から命名',
+    icon: '🔖'
   }
 ];
 

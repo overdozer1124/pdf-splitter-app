@@ -1,4 +1,4 @@
-export type NamingMode = 'sequence' | 'manual' | 'spreadsheet';
+export type NamingMode = 'sequence' | 'manual' | 'spreadsheet' | 'bookmark';
 
 export interface SequenceConfig {
   prefix: string;
