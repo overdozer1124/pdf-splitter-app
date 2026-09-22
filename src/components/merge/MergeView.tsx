@@ -1,11 +1,15 @@
 import React from 'react';
 import { MergeDropZone } from './MergeDropZone';
 import { MergeFileList } from './MergeFileList';
+import { MergeOptionsPanel } from './MergeOptions';
 import { useMerge } from '../../hooks/useMerge';
 
 export const MergeView: React.FC = () => {
   const {
     items,
+    options,
+    setOptions,
+    mergeGroups,
     isLoading,
     isMerging,
     progress,
@@ -27,7 +31,7 @@ export const MergeView: React.FC = () => {
       <div className="card section-card">
         <h2 className="section-title">🔗 複数PDFの結合 (Merge)</h2>
         <p className="section-desc">
-          複数のPDFファイルを自由な順番で1つのPDFにまとめます。ファイル名やページの順序を自由に調整できます。
+          複数のPDFファイルを自由な順番で結合します。ファイル名からしおり（目次）を自動作成したり、指定したファイル数やページ数ごとにまとめて結合することも可能です。
         </p>
 
         {error && <div className="validation-error-box">{error}</div>}
@@ -45,7 +49,7 @@ export const MergeView: React.FC = () => {
         <div className="card section-card margin-top">
           <div className="section-header-flex">
             <h3 className="card-subtitle">
-              結合順序の指定 ({items.length} ファイル / 合計 {totalPages} ページ)
+              読み込み済みPDF ({items.length} ファイル / 合計 {totalPages} ページ)
             </h3>
             <button
               type="button"
@@ -67,11 +71,20 @@ export const MergeView: React.FC = () => {
             onRemove={removeFile}
           />
 
+          {/* Merge Options Panel (Bookmarks & Batch Units) */}
+          <MergeOptionsPanel
+            options={options}
+            onChangeOptions={setOptions}
+            groups={mergeGroups}
+            totalFiles={items.length}
+            totalPages={totalPages}
+          />
+
           {/* Export / Settings Bar */}
           <div className="merge-export-bar card margin-top">
             <div className="output-name-input-group">
               <label htmlFor="merge-output-name" className="form-label">
-                出力ファイル名:
+                {mergeGroups.length > 1 ? '基本ファイル名:' : '出力ファイル名:'}
               </label>
               <input
                 id="merge-output-name"
@@ -79,7 +92,7 @@ export const MergeView: React.FC = () => {
                 className="input-text"
                 value={outputFileName}
                 onChange={(e) => setOutputFileName(e.target.value)}
-                placeholder="merged.pdf"
+                placeholder={mergeGroups.length > 1 ? 'merged' : 'merged.pdf'}
               />
             </div>
 
@@ -87,11 +100,13 @@ export const MergeView: React.FC = () => {
               <button
                 type="button"
                 className="btn btn-primary btn-large"
-                disabled={items.length < 2 || isMerging}
+                disabled={items.length === 0 || isMerging}
                 onClick={startMerge}
               >
                 {isMerging
                   ? progress?.status || '結合処理中...'
+                  : mergeGroups.length > 1
+                  ? `${mergeGroups.length} 個のPDFに分割結合してZIP保存`
                   : `1つのPDFに結合して保存 (${totalPages} ページ)`}
               </button>
             </div>
@@ -111,7 +126,7 @@ export const MergeView: React.FC = () => {
                 <div
                   className="progress-bar-fill"
                   style={{
-                    width: `${Math.round((progress.current / progress.total) * 100)}%`
+                    width: `${Math.round((progress.current / Math.max(1, progress.total)) * 100)}%`
                   }}
                 />
               </div>

@@ -1,7 +1,11 @@
-import { useState, useCallback } from 'react';
-import type { MergePdfItem, MergeProgress } from '../types/merge';
+import { useState, useCallback, useMemo } from 'react';
+import type {
+  MergePdfItem,
+  MergeOptions,
+  MergeProgress
+} from '../types/merge';
 import { loadPdfDocument, renderPageToDataUrl } from '../services/pdfReader';
-import { mergePdfs } from '../services/pdfMerger';
+import { groupMergeItems, exportMergedPdfs } from '../services/pdfMerger';
 
 export function useMerge() {
   const [items, setItems] = useState<MergePdfItem[]>([]);
@@ -10,6 +14,19 @@ export function useMerge() {
   const [progress, setProgress] = useState<MergeProgress | null>(null);
   const [outputFileName, setOutputFileName] = useState('merged.pdf');
   const [error, setError] = useState<string | null>(null);
+
+  // Merge options
+  const [options, setOptions] = useState<MergeOptions>({
+    addBookmarks: true,
+    batchMode: 'all',
+    filesPerGroup: 2,
+    maxPagesPerGroup: 20
+  });
+
+  // Calculate merge groups dynamically based on options and items
+  const mergeGroups = useMemo(() => {
+    return groupMergeItems(items, options, outputFileName);
+  }, [items, options, outputFileName]);
 
   // Add multiple files
   const addFiles = useCallback(async (files: FileList | File[]) => {
@@ -46,7 +63,6 @@ export function useMerge() {
 
       setItems((prev) => {
         const next = [...prev, ...newItems];
-        // Set default output filename based on first file name if not already custom
         if (prev.length === 0 && newItems.length > 0) {
           const baseName = newItems[0].name.replace(/\.[^/.]+$/, '');
           setOutputFileName(`結合_${baseName}.pdf`);
@@ -85,19 +101,23 @@ export function useMerge() {
 
   // Execute merge and download
   const startMerge = useCallback(async () => {
-    if (items.length === 0) return;
+    if (items.length === 0 || mergeGroups.length === 0) return;
     setIsMerging(true);
-    setProgress({ current: 0, total: items.length, status: '結合の準備中...' });
+    setProgress({ current: 0, total: mergeGroups.length, status: '結合の準備中...' });
     setError(null);
 
     try {
-      const mergedBlob = await mergePdfs(items, (p) => setProgress(p));
-      
+      const result = await exportMergedPdfs(
+        mergeGroups,
+        options.addBookmarks,
+        (p) => setProgress(p)
+      );
+
       // Trigger download
-      const url = URL.createObjectURL(mergedBlob);
+      const url = URL.createObjectURL(result.blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = outputFileName.endsWith('.pdf') ? outputFileName : `${outputFileName}.pdf`;
+      a.download = result.fileName;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -108,10 +128,13 @@ export function useMerge() {
       setIsMerging(false);
       setProgress(null);
     }
-  }, [items, outputFileName]);
+  }, [items, mergeGroups, options.addBookmarks]);
 
   return {
     items,
+    options,
+    setOptions,
+    mergeGroups,
     isLoading,
     isMerging,
     progress,

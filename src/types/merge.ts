@@ -9,6 +9,23 @@ export interface MergePdfItem {
   isEncrypted?: boolean;
 }
 
+export type MergeBatchMode = 'all' | 'byFileCount' | 'byPageCount';
+
+export interface MergeOptions {
+  addBookmarks: boolean;
+  batchMode: MergeBatchMode;
+  filesPerGroup: number;
+  maxPagesPerGroup: number;
+}
+
+export interface MergeGroupOutput {
+  id: string;
+  index: number;
+  fileName: string;
+  items: MergePdfItem[];
+  totalPages: number;
+}
+
 export interface MergeProgress {
   current: number;
   total: number;
