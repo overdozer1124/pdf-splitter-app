@@ -80,6 +80,28 @@ export async function renderThumbnailCanvas(
 }
 
 /**
+ * Render a page to Data URL (PNG/JPEG)
+ */
+export async function renderPageToDataUrl(
+  doc: pdfjsLib.PDFDocumentProxy,
+  pageIndex: number, // 0-based
+  targetWidth: number = 200
+): Promise<string> {
+  try {
+    const canvas = document.createElement('canvas');
+    await renderThumbnailCanvas(doc, pageIndex, canvas, targetWidth);
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+    canvas.width = 0;
+    canvas.height = 0;
+    return dataUrl;
+  } catch (e) {
+    console.error(`Page ${pageIndex + 1} data URL generation failed:`, e);
+    return '';
+  }
+}
+
+
+/**
  * Extract bookmarks (outlines) with their 1-based page numbers
  */
 export async function extractBookmarks(doc: pdfjsLib.PDFDocumentProxy): Promise<Array<{ title: string; page: number }>> {

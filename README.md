@@ -1,32 +1,81 @@
-# React + TypeScript + Vite
+# 🛠️ オフライン PDF ツールボックス (Offline PDF Toolbox)
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+完全無料・ブラウザ完結・100%クライアントサイド動作の総合PDF編集Webアプリケーションです。  
+外部サーバーへの通信を一切行わないため、機密文書や個人情報を含むPDFも安全に処理できます。
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 🌟 主な機能
 
-## React Compiler
+### 1. ✂️ PDF分割 & 一括命名 (Split & Rename)
+- **多彩な分割モード**:
+  - 1ページずつ分割
+  - 指定ページ数ごと（例: 2ページずつ）
+  - ページ範囲指定（例: `1-3, 4, 5-8`）
+  - サムネイル視覚クリック分割（プレビューを見ながら分割境界を設定）
+- **高度なファイル命名規則**:
+  - 連番命名（接頭辞・開始番号・桁数指定）
+  - 個別手動入力
+  - Excel / CSV 名簿テンプレートからの自動マッピング
+  - **PDFしおり（目次）からの自動抽出・命名**
+- **安全な出力**:
+  - Windows/Macファイル名禁止文字の自動サニタイズ
+  - 重複ファイル名・件数不一致のバリデーション
+  - 全ファイル一括ZIPダウンロード
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### 2. 🔗 PDF結合 (Merge)
+- 複数のPDFファイルをドラッグ＆ドロップでまとめて追加
+- ▲ / ▼ ボタンまたはドラッグによる結合順序の入れ替え
+- 先頭ページのサムネイルプレビュー表示
+- 指定したファイル名で1つのPDFとして統合・高速ダウンロード
 
-## Expanding the Oxlint configuration
+### 3. 🔄 ページの整理・回転・削除 (Organize & Rotate)
+- PDF全ページのサムネイルカード一覧表示
+- **ページ単位の操作**:
+  - ↺ 左に90°回転 / ↻ 右に90°回転
+  - ◀ / ▶ 前後へ移動（ドラッグ＆ドロップ並び替え）
+  - 🗑️ 不要ページの削除
+- **一括操作ツールバー**:
+  - 全ページ左/右90°回転
+  - 奇数ページ / 偶数ページの選択
+  - 選択中ページの一括回転・一括削除
+  - 初期状態へのリセット
+- 別のPDFを追加してページを差し込む機能
+- 編集済みPDFのワンクリック保存
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
+---
 
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+## 🔒 プライバシー保護・セキュリティ設計 (Privacy by Design)
+- **完全ローカル処理**: WebAssembly / JavaScript (`pdf-lib`, `pdfjs-dist`) を使用し、ブラウザ内のみで全てのPDF解析・構築を行います。
+- **通信ゼロ**: PDFファイルや名簿データがインターネット上のサーバーに送信されることは一切ありません。
+- **オフライン動作 (PWA対応)**: ネットワーク未接続の環境でもスタンドアロンで利用可能です。
+
+---
+
+## 🛠️ 技術スタック
+- **Frontend**: React 19, TypeScript, Vite
+- **PDF Engine**: `pdf-lib` (PDF生成・結合・回転・抽出), `pdfjs-dist` (PDF解析・サムネイル描画)
+- **Data & Archive**: `xlsx` (Excel/CSV読込), `jszip` (ZIP圧縮)
+- **Offline / PWA**: `vite-plugin-pwa` (Service Worker / Workbox)
+- **Testing**: `vitest` (単体テスト), `@playwright/test` (E2Eテスト)
+
+---
+
+## 🚀 開発・ビルド手順
+
+```bash
+# 依存関係のインストール
+npm install
+
+# 開発サーバー起動
+npm run dev
+
+# 単体テストの実行
+npm run test
+
+# E2Eテストの実行
+npm run test:e2e
+
+# 本番ビルド
+npm run build
 ```
-
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.

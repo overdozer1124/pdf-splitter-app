@@ -974,3 +974,451 @@ body {
   color: var(--text-muted);
   margin-top: 32px;
 }
+
+/* =========================================
+   Tool Navigation Tabs
+   ========================================= */
+.app-nav-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  background-color: var(--card-bg);
+  padding: 8px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+}
+
+.app-nav-tab {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background-color: transparent;
+  border: 2px solid transparent;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s ease;
+  color: var(--text-main);
+}
+
+.app-nav-tab:hover {
+  background-color: var(--bg-color);
+}
+
+.app-nav-tab.active {
+  background-color: var(--primary-light);
+  border-color: var(--primary-color);
+  box-shadow: var(--shadow-sm);
+}
+
+.nav-tab-icon {
+  font-size: 1.8rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.nav-tab-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.nav-tab-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.app-nav-tab.active .nav-tab-title {
+  color: var(--primary-color);
+}
+
+.nav-tab-desc {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+@media (max-width: 768px) {
+  .app-nav-tabs {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+}
+
+/* =========================================
+   Common Components & Utilities
+   ========================================= */
+.dropzone-compact {
+  padding: 24px 16px;
+}
+.dropzone-compact .dropzone-icon {
+  font-size: 2rem;
+  margin-bottom: 6px;
+}
+.dropzone-compact .dropzone-title {
+  font-size: 1.1rem;
+}
+
+.btn-small {
+  padding: 6px 12px;
+  font-size: 0.85rem;
+}
+
+.btn-icon {
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f1f5f9;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  color: var(--secondary-color);
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-icon:hover:not(:disabled) {
+  background-color: #e2e8f0;
+  color: var(--text-main);
+}
+
+.btn-icon:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.btn-icon-small {
+  width: 28px;
+  height: 28px;
+  font-size: 0.85rem;
+}
+
+.btn-icon-danger:hover:not(:disabled) {
+  background-color: #fee2e2;
+  color: var(--danger-color);
+  border-color: #fca5a5;
+}
+
+.section-header-flex {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.helper-text {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+
+.output-name-input-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 280px;
+}
+
+.output-name-input-group label {
+  font-weight: 600;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.output-name-input-group input {
+  flex: 1;
+}
+
+/* =========================================
+   Merge View Styles
+   ========================================= */
+.merge-file-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.merge-file-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.merge-file-card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.merge-file-order {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background-color: var(--primary-light);
+  color: var(--primary-color);
+  font-weight: 700;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.merge-file-thumb {
+  width: 50px;
+  height: 65px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  background-color: #f8fafc;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.merge-file-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.merge-file-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.merge-file-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.merge-file-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+}
+
+.file-size-tag {
+  color: var(--text-muted);
+}
+
+.merge-file-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.merge-export-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 16px 20px;
+  background-color: #f8fafc;
+}
+
+/* =========================================
+   Organize & Rotate Styles
+   ========================================= */
+.organize-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  background-color: #f8fafc;
+  border: 1px solid var(--border-color);
+}
+
+.toolbar-section {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.toolbar-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--secondary-color);
+}
+
+.toolbar-btn-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.organize-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+.page-card {
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  border-radius: var(--radius-md);
+  border: 2px solid var(--border-color);
+  background-color: #fff;
+  transition: all 0.2s ease;
+  user-select: none;
+  cursor: grab;
+}
+
+.page-card:active {
+  cursor: grabbing;
+}
+
+.page-card:hover {
+  border-color: #94a3b8;
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.page-card-selected {
+  border-color: var(--primary-color) !important;
+  background-color: var(--primary-light) !important;
+}
+
+.page-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.page-select-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.page-checkbox {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: var(--primary-color);
+}
+
+.page-number-badge {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--secondary-color);
+  padding: 2px 6px;
+  background-color: #e2e8f0;
+  border-radius: 4px;
+}
+
+.page-card-thumb-container {
+  width: 100%;
+  aspect-ratio: 1 / 1.35;
+  background-color: #f1f5f9;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+}
+
+.page-card-thumb-wrapper {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.page-card-thumb-img {
+  max-width: 95%;
+  max-height: 95%;
+  object-fit: contain;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background-color: #fff;
+}
+
+.thumb-placeholder {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.page-card-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  margin-top: 8px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.source-info-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rotation-tag {
+  font-weight: 700;
+  color: var(--primary-color);
+  background-color: var(--primary-light);
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-size: 0.7rem;
+}
+
+.page-card-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border-color);
+}
+
+.control-group-rotate,
+.control-group-move {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.organize-export-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 16px 20px;
+  background-color: #f8fafc;
+}
+
